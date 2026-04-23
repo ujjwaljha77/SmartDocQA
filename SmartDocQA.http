@@ -1,0 +1,6 @@
+@SmartDocQA_HostAddress = http://localhost:5133
+
+GET {{SmartDocQA_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
