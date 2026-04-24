@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDocQA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #7f8c8d;
+            margin-bottom: 24px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background: #2980b9;
+            }
+
+            button:disabled {
+                background: #95a5a6;
+                cursor: not-allowed;
+            }
+
+        .result {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+
+            .result h3 {
+                color: #2c3e50;
+                margin-bottom: 8px;
+            }
+
+            .result p {
+                color: #34495e;
+                line-height: 1.6;
+                margin: 0;
+            }
+
+        .error {
+            border-left-color: #e74c3c;
+        }
+
+            .error h3 {
+                color: #e74c3c;
+            }
+
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 SmartDocQA</h1>
+        <p>Upload a PDF and ask any question about it!</p>
+
+        <label>📄 Upload PDF</label>
+        <input type="file" id="pdfFile" accept=".pdf" />
+
+        <label>❓ Your Question</label>
+        <input type="text" id="question" placeholder="What is this document about?" />
+
+        <button id="askBtn" onclick="askQuestion()">Ask AI</button>
+
+        <div class="result" id="result">
+            <h3 id="resultTitle">Answer</h3>
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        async function askQuestion() {
+            const file = document.getElementById('pdfFile').files[0];
+            const question = document.getElementById('question').value;
+            const btn = document.getElementById('askBtn');
+            const result = document.getElementById('result');
+
+            if (!file) { alert('Please upload a PDF!'); return; }
+            if (!question) { alert('Please enter a question!'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Thinking...';
+            result.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('question', question);
+
+            try {
+                const response = await fetch('/api/Document/upload-and-ask', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                result.className = 'result';
+                document.getElementById('resultTitle').textContent = '✅ Answer';
+                document.getElementById('resultText').textContent = data.answer;
+            } catch (err) {
+                result.className = 'result error';
+                document.getElementById('resultTitle').textContent = '❌ Error';
+                document.getElementById('resultText').textContent = err.message;
+            }
+
+            result.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Ask AI';
+        }
+    </script>
+</body>
+</html>
